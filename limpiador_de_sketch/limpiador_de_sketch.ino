@@ -1,16 +1,57 @@
-//codigo para limpiar el data sketch
-const int ledPin = 14;
+/*
+codigo para limpiar el data sketch
+  comenta el codigo depende el ESP que se utilice, 
+  deja solo las secciones depende del ESP
+*/
+
+#include <Arduino.h>
+
+#if defined(ESP32)
+  #include "SPIFFS.h"
+  const int ledPin = 33;
+  const int conect = 115200;
+#elif defined(ESP8266)
+  #include <FS.h>
+  const int ledPin = LED_BUILTIN;
+  const int conect = 74880;
+#endif
 
 void setup() {
-  pinMode(ledPin, OUTPUT);  // Initialize the LED_BUILTIN pin as an output
+  Serial.begin(conect);
+  pinMode(ledPin, OUTPUT);
+
+  digitalWrite(LED_BUILTIN, LOW);
+  
+  //inicializacion de SPIFFS
+  if (!SPIFFS.begin()) { 
+    Serial.println("Error al montar SPIFFS"); 
+    return; 
+  }
+  /* seccion para ESP 32-cam 
+  else{
+    File root = SPIFFS.open("/");
+    File file = root.openNextFile();
+    while(file){
+      Serial.print("Archivo en SPIFFS: ");
+      Serial.println(file.name());
+      file = root.openNextFile();
+    }
+    Serial.println("montado: SPIFFS");
+  }
+  /* fin seccion para ESP 32-cam */
+
+  /* seccion para ESP 8266*/
+  Dir dir = SPIFFS.openDir("/"); 
+  Serial.print("Archivo en SPIFFS: "); 
+  while (dir.next()) {
+    Serial.println(dir.fileName()); 
+  }
+  /*fin seccion para ESP 8266*/
 }
 
-// the loop function runs over and over again forever
 void loop() {
-  digitalWrite(ledPin, LOW);  // Turn the LED on (Note that LOW is the voltage level
-  // but actually the LED is on; this is because
-  // it is active low on the ESP-01)
-  delay(1000);                      // Wait for a second
-  digitalWrite(ledPin, HIGH);  // Turn the LED off by making the voltage HIGH
-  delay(2000);                      // Wait for two seconds (to demonstrate the active low LED)
+  digitalWrite(ledPin, HIGH); 
+  delay(2000);  
+  digitalWrite(ledPin, LOW); 
+  delay(2000);  
 }
